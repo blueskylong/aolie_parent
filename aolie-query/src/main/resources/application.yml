@@ -1,0 +1,70 @@
+spring:
+  main:
+    allow-circular-references: true
+  jackson:
+    # 全局设置@JsonFormat的格式pattern
+    date-format: yyyy-MM-dd
+    # 当地时区
+    locale: zh
+    # 设置全局时区
+    time-zone: GMT+8
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: root
+  application:
+    name: aolie-query
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: oracle.jdbc.driver.OracleDriver
+      url: jdbc:oracle:thin:@127.0.0.1:1521:orcl
+      username: test_query
+      password: 1
+      initial-size: 10
+      max-active: 100
+      min-idle: 10
+      max-wait: 60000
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+      filter:
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: false
+        wall:
+          config:
+            multi-statement-allow: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: on
+    jdbc-type-for-null: 'null'
+  type-handlers-package: com.ranranx.aolie.core.ds.dataoperator.mybatis
+logging:
+  pattern:
+    console: "%C:%L %m%n"
+#pagehelper.
+pagehelper:
+  autoDialect: true
+  closeConn: true
+  hello: \u4F60\u597D
+  nihao: Hello
+  offset-as-page-num: false
+aolie:
+  uploadpath: "g:/affix_location"
+server:
+  port: 8082
+dubbo:
+  scan:
+    base-packages: "com.ranranx.aolie"
+  protocol:
+    port: 20885
+    name: dubbo
+  cloud:
+    subscribed-services: aolie-core
