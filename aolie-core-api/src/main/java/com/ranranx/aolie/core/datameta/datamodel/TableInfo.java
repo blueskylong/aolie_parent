@@ -1,0 +1,485 @@
+package com.ranranx.aolie.core.datameta.datamodel;
+
+import com.alibaba.fastjson.annotation.JSONField;
+import com.ranranx.aolie.common.types.CommonUtils;
+import com.ranranx.aolie.common.types.Constants;
+import com.ranranx.aolie.common.types.IdGenerator;
+import com.ranranx.aolie.core.types.SqlTools;
+import com.ranranx.aolie.core.datameta.datamodel.validator.IValidator;
+import com.ranranx.aolie.core.datameta.datamodel.validator.ValidatorCenter;
+import com.ranranx.aolie.core.datameta.dto.ColumnDto;
+import com.ranranx.aolie.core.datameta.dto.FormulaDto;
+import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
+import com.ranranx.aolie.core.datameta.dto.TableDto;
+import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
+import com.ranranx.aolie.common.exceptions.InvalidConfigException;
+import com.ranranx.aolie.common.exceptions.NotExistException;
+
+import java.beans.Transient;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author xxl
+ * @version V0.0.1
+ * @date 2020/8/5 17:34
+ **/
+public class TableInfo implements Serializable {
+
+    private TableDto tableDto;
+
+    private List<ReferenceDto> lstReference;
+
+    private List<Column> lstKeyColumn;
+
+    private String keyFieldName;
+    /**
+     * 验证器
+     */
+    private ValidatorCenter validatorCenter;
+
+    public TableInfo() {
+
+    }
+
+    public TableInfo(TableDto tableDto) {
+        this.tableDto = tableDto;
+    }
+
+    /**
+     * 表内列表
+     */
+    private List<Column> lstColumn = new ArrayList<>();
+
+    public String getDsKey() {
+        if (tableDto.getDataOperId() == null) {
+            Schema schema = SchemaHolder.getSchema(tableDto.getSchemaId(), tableDto.getVersionCode());
+            if (schema != null) {
+                return schema.getDsKey();
+            }
+            return DataSourceUtils.getDefaultDataSourceKey();
+        }
+        DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(tableDto.getDataOperId(), tableDto.getVersionCode());
+        if (dataOperatorInfo == null) {
+            throw new NotExistException("数据库连接:[" + tableDto.getDataOperId() + "__" + tableDto.getVersionCode() + "]不存在");
+        }
+        return dataOperatorInfo.getDsKey();
+    }
+
+    /**
+     * 查询主键列
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public List<Column> getKeyColumn() {
+        if (this.lstKeyColumn != null) {
+            return this.lstKeyColumn;
+        }
+
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            this.lstKeyColumn = new ArrayList<>();
+            return null;
+        }
+        synchronized (TableInfo.class) {
+            if (this.lstKeyColumn != null) {
+                return this.lstKeyColumn;
+            }
+
+            for (Column column : lstColumn) {
+                if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1) {
+                    //去掉版本字段
+                    if (column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
+                        continue;
+                    }
+                    if (this.lstKeyColumn == null) {
+                        this.lstKeyColumn = new ArrayList<>();
+                    }
+                    lstKeyColumn.add(column);
+                }
+            }
+
+        }
+
+        return lstKeyColumn;
+    }
+
+    /**
+     * 根据字段标题查询字段信息,这里注意的是,字段标题不一定唯一
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public Column findColumnByColTitle(String title) {
+        if (CommonUtils.isEmpty(title)) {
+            return null;
+        }
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column column : this.lstColumn) {
+            if (column.getColumnDto().getTitle().equals(title)) {
+                return column;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 根据字段名查询字段信息
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public Column findColumnByName(String fieldName) {
+        if (CommonUtils.isEmpty(fieldName)) {
+            return null;
+        }
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column column : this.lstColumn) {
+            if (column.getColumnDto().getFieldName().equals(fieldName)) {
+                return column;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 查询主键列,包含版本. 含有版本字段就默认是主键之一
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public String getIdFieldIncludeVersionCode() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        this.lstColumn.forEach(column -> {
+            if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1
+                    || column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
+                sb.append(column.getColumnDto().getFieldName()).append(",");
+            }
+        });
+        return sb.substring(0, sb.length() - 1);
+    }
+
+    /**
+     * 取得所有列对象
+     *
+     * @param schemaId
+     * @param versionCode
+     * @return
+     */
+    public List<ColumnDto> getColumnDtos(Long schemaId, String versionCode) {
+        List<ColumnDto> lstResult = new ArrayList<>();
+        if (lstColumn != null && !lstColumn.isEmpty()) {
+            lstColumn.forEach((column -> {
+                ColumnDto dto = column.getColumnDto();
+                dto.setSchemaId(schemaId);
+                dto.setVersionCode(versionCode);
+                lstResult.add(dto);
+            }));
+        }
+        return lstResult;
+    }
+
+    /**
+     * 取得所有公式对象
+     *
+     * @param schemaId
+     * @param versionCode
+     * @return
+     */
+    public List<FormulaDto> getFormulaDtos(Long schemaId, String versionCode) {
+        List<FormulaDto> lstResult = new ArrayList<>();
+        if (lstColumn != null && !lstColumn.isEmpty()) {
+            lstColumn.forEach((column -> {
+                List<Formula> lstFormula = column.getLstFormula();
+                if (lstFormula != null && !lstFormula.isEmpty()) {
+                    for (int i = 0; i < lstFormula.size(); i++) {
+                        FormulaDto dto = lstFormula.get(i).getFormulaDto();
+                        dto.setOrderNum(i + 1);
+                        dto.setColumnId(column.getColumnDto().getColumnId());
+                        dto.setSchemaId(schemaId);
+                        dto.setVersionCode(versionCode);
+                        lstResult.add(dto);
+                    }
+                }
+            }));
+        }
+        return lstResult;
+    }
+
+    /**
+     * 取得所有公式对象
+     *
+     * @param schemaId
+     * @param versionCode
+     * @return
+     */
+    public List<Formula> getFormulas(Long schemaId, String versionCode) {
+        List<Formula> lstResult = new ArrayList<>();
+        if (lstColumn != null && !lstColumn.isEmpty()) {
+            lstColumn.forEach((column -> {
+                List<Formula> lstFormula = column.getLstFormula();
+                if (lstFormula != null && !lstFormula.isEmpty()) {
+                    for (int i = 0; i < lstFormula.size(); i++) {
+                        FormulaDto dto = lstFormula.get(i).getFormulaDto();
+                        dto.setOrderNum(i + 1);
+                        dto.setColumnId(column.getColumnDto().getColumnId());
+                        dto.setSchemaId(schemaId);
+                        dto.setVersionCode(versionCode);
+                        lstResult.add(lstFormula.get(i));
+                    }
+                }
+            }));
+        }
+        return lstResult;
+    }
+
+    /**
+     * 修改列ID,并将变化的列返回
+     */
+    public Map<Long, Long> updateColId(Map<Long, Long> tableChangeId) {
+        if (this.tableDto.getTableId() < 0) {
+            long tableId = IdGenerator.getNextId(TableInfo.class.getName());
+            tableChangeId.put(this.tableDto.getTableId(), tableId);
+            this.tableDto.setTableId(tableId);
+            if (lstColumn != null && !lstColumn.isEmpty()) {
+                this.lstColumn.forEach(column -> column.updateTableId(tableId));
+            }
+            //更新本表的ID
+            if (this.lstReference != null) {
+                for (ReferenceDto dto : this.lstReference) {
+                    dto.setTableId(tableId);
+                }
+            }
+        }
+        return validateColumn();
+
+    }
+
+    public void columnIdChanged(Map<Long, Long> columnIds) {
+        if (this.lstColumn != null && !this.lstColumn.isEmpty()) {
+            for (Column column : this.lstColumn) {
+                column.columnIdChanged(columnIds);
+            }
+        }
+    }
+
+    private Map<Long, Long> validateColumn() {
+        if (this.lstColumn != null && !this.lstColumn.isEmpty()) {
+            Map<Long, Long> lstResult = new HashMap<>();
+            for (Column column : this.lstColumn) {
+                if (column.getColumnDto().getColumnId() < 0) {
+                    long newId = IdGenerator.getNextId(Column.class.getName());
+                    lstResult.put(column.getColumnDto().getColumnId(), newId);
+                    column.getColumnDto().setColumnId(newId);
+                }
+            }
+            return lstResult;
+        }
+        return null;
+
+    }
+
+    /**
+     * 取得主键字段
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public String getKeyField() {
+        if (CommonUtils.isNotEmpty(keyFieldName)) {
+            return keyFieldName;
+        }
+        List<Column> keyColumn = getKeyColumn();
+        if (keyColumn == null || keyColumn.size() != 1) {
+            throw new InvalidConfigException("表主键定义不正确:" + this.getTableDto().getTableId());
+        }
+        this.keyFieldName = keyColumn.get(0).getColumnDto().getFieldName();
+        return this.keyFieldName;
+    }
+
+    /**
+     * 表内约束
+     */
+    private List<Constraint> lstConstrant;
+
+    public List<Column> getLstColumn() {
+        return lstColumn;
+    }
+
+    public void addColumn(Column column) {
+        lstColumn.add(column);
+    }
+
+    public void setLstColumn(List<Column> lstColumn) {
+        this.lstColumn = lstColumn;
+    }
+
+    public TableDto getTableDto() {
+        return tableDto;
+    }
+
+    public void setTableDto(TableDto tableDto) {
+        this.tableDto = tableDto;
+    }
+
+    public List<Constraint> getLstConstrant() {
+        return lstConstrant;
+    }
+
+    public void setLstConstrant(List<Constraint> lstConstrant) {
+        this.lstConstrant = lstConstrant;
+    }
+
+    public List<ReferenceDto> getLstReference() {
+        return lstReference;
+    }
+
+    public void setLstReference(List<ReferenceDto> lstReference) {
+        this.lstReference = lstReference;
+    }
+
+    @Transient
+    @JSONField(serialize = false)
+    public  List<FieldOrder> getDefaultOrder() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        List<FieldOrder> lstOrder = new ArrayList<>();
+        for (Column col : this.lstColumn) {
+            if (col.getColumnDto().getFieldName().equals(Constants.FixColumnName.LVL_CODE)
+                    || col.getColumnDto().getFieldName().equals(Constants.FixColumnName.XH)) {
+                lstOrder.add(new FieldOrder(this.getTableDto().getTableName(), col.getColumnDto().getFieldName(), true, 0));
+            }
+        }
+        return lstOrder;
+    }
+
+    @Transient
+    @JSONField(serialize = false)
+    public ValidatorCenter getValidatorCenter(List<IValidator> lstValidator) {
+        if (this.validatorCenter != null) {
+            return this.validatorCenter;
+        }
+        this.validatorCenter = new ValidatorCenter(this);
+        this.validatorCenter.setValidators(lstValidator);
+        return this.validatorCenter;
+    }
+
+    /**
+     * 取得列所有公式 key:colId value: list of formula
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public Map<Long, List<Formula>> getAllColumnFormula() {
+        Map<Long, List<Formula>> mapFormula = new HashMap<>();
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return mapFormula;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getLstFormula() != null && !col.getLstFormula().isEmpty()) {
+                mapFormula.put(col.getColumnDto().getColumnId(), col.getLstFormula());
+            }
+        }
+        return mapFormula;
+    }
+
+    /**
+     * 取得列所有公式  list of formula
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public List<Formula> getAllFormula() {
+        List<Formula> lstFormula = new ArrayList<>();
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return lstFormula;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getLstFormula() != null && !col.getLstFormula().isEmpty()) {
+                lstFormula.addAll(col.getLstFormula());
+            }
+        }
+        return lstFormula;
+    }
+
+    @Transient
+    @JSONField(serialize = false)
+    public Column findColumn(Long colId) {
+        if (this.lstColumn == null || this.lstColumn.isEmpty() || colId == null) {
+            return null;
+        }
+        for (Column col : this.lstColumn) {
+            if (colId.equals(col.getColumnDto().getColumnId())) {
+                return col;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 生成查询用列信息,key:fieldName,value :列信息
+     *
+     * @return
+     */
+    @Transient
+    @JSONField(serialize = false)
+    public Map<String, Column> getMapColumn() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        Map<String, Column> map = new HashMap<>();
+        for (Column col : this.lstColumn) {
+            map.put(col.getColumnDto().getFieldName(), col);
+        }
+        return map;
+    }
+
+    @Transient
+    @JSONField(serialize = false)
+    public FieldOrder getOrder() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getColumnDto().getFieldName().equals(Constants.FixColumnName.LVL_CODE)
+                    || col.getColumnDto().getFieldName().equals(Constants.FixColumnName.XH)) {
+                return new FieldOrder(this.getTableDto().getTableName(), col.getColumnDto().getFieldName(), true, 0);
+            }
+        }
+        return null;
+
+    }
+
+    @Transient
+    @JSONField(serialize = false)
+    public String getColumnMybatisType(String columnName) {
+        Column col = this.findColumnByName(columnName);
+        if (col == null) {
+            return null;
+        }
+        return SqlTools.getMyBatisColType(col.getColumnDto().getFieldType());
+
+    }
+
+}
