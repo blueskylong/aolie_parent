@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/aolie-application/aolie-application.iml" filepath="$PROJECT_DIR$/aolie-application/aolie-application.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-application-api/aolie-application-api.iml" filepath="$PROJECT_DIR$/aolie-application-api/aolie-application-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-bs-rw/aolie-bs-rw.iml" filepath="$PROJECT_DIR$/aolie-bs-rw/aolie-bs-rw.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-common/aolie-common.iml" filepath="$PROJECT_DIR$/aolie-common/aolie-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-core/aolie-core.iml" filepath="$PROJECT_DIR$/aolie-core/aolie-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-core-api/aolie-core-api.iml" filepath="$PROJECT_DIR$/aolie-core-api/aolie-core-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-gateway/aolie-gateway.iml" filepath="$PROJECT_DIR$/aolie-gateway/aolie-gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-gateway-api/aolie-gateway-api.iml" filepath="$PROJECT_DIR$/aolie-gateway-api/aolie-gateway-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-monitor/aolie-monitor.iml" filepath="$PROJECT_DIR$/aolie-monitor/aolie-monitor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-monitor-api/aolie-monitor-api.iml" filepath="$PROJECT_DIR$/aolie-monitor-api/aolie-monitor-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aolie-query/aolie-query.iml" filepath="$PROJECT_DIR$/aolie-query/aolie-query.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/aolie_parent.iml" filepath="$PROJECT_DIR$/.idea/aolie_parent.iml" />
+    </modules>
+  </component>
+</project>

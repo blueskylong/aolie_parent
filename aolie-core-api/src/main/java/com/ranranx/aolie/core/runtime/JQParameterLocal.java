@@ -46,7 +46,7 @@ public class JQParameterLocal extends JQParameter {
     @Override
     @Autowired
     public void setUiService(UiService uiService) {
-        this.uiService = uiService;
+        JQParameterLocal.uiService = uiService;
     }
 
 }

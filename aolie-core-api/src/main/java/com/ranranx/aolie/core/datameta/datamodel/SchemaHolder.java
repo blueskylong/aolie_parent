@@ -289,11 +289,16 @@ public class SchemaHolder {
      * @param schema
      */
     private static void setOneSchema(Schema schema) {
+        mapSchema.put(CommonUtils.makeKey(schema.getSchemaDto().getSchemaId().toString(),
+                schema.getSchemaDto().getVersionCode()), schema);
         setSchemaTableAndColumnAndRef(schema);
     }
 
     private static void setSchemaTableAndColumnAndRef(Schema schema) {
         List<TableInfo> lstTable = schema.getLstTable();
+        if(lstTable == null||lstTable.isEmpty()){
+            return;
+        }
 
         for (TableInfo tableInfo : lstTable) {
             mapTables.put(CommonUtils.makeKey(String.valueOf(tableInfo.getTableDto().getTableId()),

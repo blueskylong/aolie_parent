@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,9 @@ public class LogService {
     static {
         sSql = "INSERT INTO aolie_s_log (start_time,end_time," +
                 "  user_id,schema_id,table_id,result_size,oper_type,log_type,memo,path,oper_id,log_id" +
-                ",last_time)VALUES(#{start_time},#{end_time},#{user_id},#{schema_id}," +
+                ",last_time,sys_id)VALUES(#{start_time},#{end_time},#{user_id},#{schema_id}," +
                 "     #{table_id},#{result_size},#{oper_type},#{log_type},#{memo}," +
-                "    #{path},#{oper_id},#{log_id},#{last_time})";
+                "    #{path},#{oper_id},#{log_id},#{last_time},#{sys_id})";
         mapEmpty.put(MonitorConstants.LogTableFields.start_time, null);
         mapEmpty.put(MonitorConstants.LogTableFields.end_time, null);
         mapEmpty.put(MonitorConstants.LogTableFields.user_id, null);
@@ -48,6 +49,7 @@ public class LogService {
         mapEmpty.put(MonitorConstants.LogTableFields.oper_id, null);
         mapEmpty.put(MonitorConstants.LogTableFields.log_id, null);
         mapEmpty.put(MonitorConstants.LogTableFields.last_time, null);
+        mapEmpty.put(MonitorConstants.LogTableFields.sys_id, null);
 
     }
 
@@ -70,10 +72,24 @@ public class LogService {
             Map<String, Object> mapTemp = new HashMap<>();
             mapTemp.putAll(mapEmpty);
             mapTemp.putAll(this.mapValue);
+            handleType(mapTemp);
             mapTemp.put(MonitorConstants.LogTableFields.log_id, IdGenerator.getNextId(""));
             SqlExp sqlExp = new SqlExp(sSql, mapTemp);
             dataOperator.executeDirect(sqlExp.getExecuteMap());
             this.mapValue = null;
+        }
+    }
+
+    private void handleType(Map<String, Object> map) {
+        Object o = map.get(MonitorConstants.LogTableFields.start_time);
+        if (o != null) {
+            map.put(MonitorConstants.LogTableFields.start_time,
+                    new Date((Long) map.get(MonitorConstants.LogTableFields.start_time)));
+        }
+        o = map.get(MonitorConstants.LogTableFields.end_time);
+        if (o != null) {
+            map.put(MonitorConstants.LogTableFields.end_time,
+                    new Date((Long) map.get(MonitorConstants.LogTableFields.end_time)));
         }
     }
 

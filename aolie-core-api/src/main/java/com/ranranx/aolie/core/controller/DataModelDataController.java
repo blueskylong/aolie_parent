@@ -26,6 +26,10 @@ public class DataModelDataController {
 
     @Autowired
     private DmDataService dmDataService;
+
+    public DataModelDataController(){
+        System.out.println();
+    }
     /**
      * 保存增加的数据
      * 检查

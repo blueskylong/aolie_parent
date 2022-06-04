@@ -38,7 +38,7 @@ import reactor.core.publisher.Mono;
  **/
 @EnableWebFluxSecurity
 public class SecurityConfig {
-    private static final String[] excludeAuthPages = {"/auth/login"};
+    private static final String[] excludeAuthPages = {"/login"};
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -89,7 +89,7 @@ public class SecurityConfig {
 //                .authenticationSuccessHandler(successHandler)
 //                .authenticationFailureHandler(failHandler)
 //                .and()
-                .logout().logoutUrl("/auth/logout")
+                .logout().logoutUrl("/logout")
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
                 .addFilterAt(authenticationFilter, SecurityWebFiltersOrder.HTTP_BASIC)

@@ -25,6 +25,9 @@
         <module>aolie-gateway-api</module>
         <module>aolie-application-api</module>
         <module>aolie-common</module>
+        <module>aolie-bs-rw</module>
+        <module>aolie-monitor-api</module>
+
     </modules>
 
     <properties>
@@ -48,8 +51,9 @@
         <spring-cloud-feign.version>3.0.6</spring-cloud-feign.version>
         <spring-cloud.sub.version>3.0.1</spring-cloud.sub.version>
         <spring-cloud-feign.version>3.0.6</spring-cloud-feign.version>
-
+        <sharding.version>4.1.1</sharding.version>
         <fastjson.version>1.2.83</fastjson.version>
+        <rocketmq.version>2.2.2</rocketmq.version>
 
         <pagehelper.sub.version>5.2.0</pagehelper.sub.version>
     </properties>

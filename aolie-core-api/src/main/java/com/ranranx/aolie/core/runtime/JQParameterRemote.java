@@ -23,7 +23,7 @@ public class JQParameterRemote extends JQParameter {
     @Override
     @DubboReference
     public void setUiService(UiService uiService) {
-        this.uiService = uiService;
+        JQParameterLocal.uiService = uiService;
     }
 
 }

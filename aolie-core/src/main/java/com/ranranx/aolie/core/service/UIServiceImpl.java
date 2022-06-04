@@ -296,7 +296,7 @@ public class UIServiceImpl implements UiService {
                 .andEqualTo(null, "schema_id", schemaId);
         queryParamDefinition.addOrder(new FieldOrder(TableDto.class, "table_id", true, 0));
         Schema schema = SchemaHolder.getSchema(schemaId, versionCode);
-        return factory.getDataOperatorByKey(schema.getDsKey()).select(queryParamDefinition, TableDto.class);
+        return factory.getDefaultDataOperator().select(queryParamDefinition, TableDto.class);
     }
 
     @Transactional(readOnly = false)

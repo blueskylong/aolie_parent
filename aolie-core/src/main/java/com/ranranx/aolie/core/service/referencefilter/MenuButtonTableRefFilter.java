@@ -72,7 +72,7 @@ public class MenuButtonTableRefFilter implements IReferenceDataFilter {
                 "       and f.version_code=#{versionCode}";
         Map<String, Object> map = new LinkedHashMap<>(2);
         map.put("menuId", menuId);
-        map.put("versionCode", SessionUtils.getLoginUser());
+        map.put("versionCode", SessionUtils.getLoginVersion());
         SqlExp sqlExp = new SqlExp(sSql, map);
         QueryParam param = new QueryParam().setSqlExp(sqlExp);
         HandleResult handleResult = factory.handleQuery(param);

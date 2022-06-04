@@ -10,6 +10,7 @@ import com.ranranx.aolie.common.types.SystemParam;
 import com.ranranx.aolie.common.types.UserRightNode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version V0.0.1
  * @date 2020/9/11 10:34
  **/
+@Component
 public class SessionUtils extends SimpleSessionUtils {
 
     /**
@@ -55,6 +57,9 @@ public class SessionUtils extends SimpleSessionUtils {
         Object myUser = (auth != null) ? auth.getPrincipal() : null;
         if (myUser instanceof String) {
             return null;
+        }
+        if (myUser == null && RequestContextHolder.getRequestAttributes() != null) {
+            return getCurrentUser();
         }
         return (LoginUser) myUser;
     }
@@ -249,12 +254,9 @@ public class SessionUtils extends SimpleSessionUtils {
     }
 
 
-
-
     public static void setDefaultVersion(String defaultVersion) {
         SessionUtils.defaultVersion = defaultVersion;
     }
-
 
 
     private static SessionStoreService sessionStoreService;
@@ -264,7 +266,6 @@ public class SessionUtils extends SimpleSessionUtils {
     }
 
     public static LoginUser getCurrentUser() {
-        System.out.println(sessionStoreService.getValue("myKey"));
         //TOMCAT
         if (RequestContextHolder.getRequestAttributes().getClass().getSimpleName().equals("ServletRequestAttributes")) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ranranx.aolie.common.types.CommonUtils;
 import com.ranranx.aolie.common.types.Constants;
 import com.ranranx.aolie.common.types.IdGenerator;
@@ -55,6 +56,8 @@ public class TableInfo implements Serializable {
      */
     private List<Column> lstColumn = new ArrayList<>();
 
+    @JsonIgnore
+    @JSONField(serialize = false)
     public String getDsKey() {
         if (tableDto.getDataOperId() == null) {
             Schema schema = SchemaHolder.getSchema(tableDto.getSchemaId(), tableDto.getVersionCode());

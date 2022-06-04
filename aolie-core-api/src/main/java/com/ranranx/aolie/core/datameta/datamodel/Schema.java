@@ -6,6 +6,7 @@ import com.ranranx.aolie.common.types.IdGenerator;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.common.exceptions.NotExistException;
+import com.ranranx.aolie.core.runtime.SessionUtils;
 
 import java.beans.Transient;
 import java.io.Serializable;
@@ -245,7 +246,8 @@ public class Schema implements Serializable {
         }
         DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(schemaDto.getDataOperId(), schemaDto.getVersionCode());
         if (dataOperatorInfo == null) {
-            throw new NotExistException("数据库连接:[" + schemaDto.getDataOperId() + "__" + schemaDto.getVersionCode() + "]不存在");
+            return DataSourceUtils.getDefaultDataSourceKey();
+//            throw new NotExistException("数据库连接:[" + schemaDto.getDataOperId() + "__" + schemaDto.getVersionCode() + "]不存在");
         }
         return dataOperatorInfo.getDsKey();
     }

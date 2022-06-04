@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aolie-application" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aolie-core-application" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aolie-core-config" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aolie_core_application" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aolie_wf" vcs="Git" />
+  </component>
+</project>

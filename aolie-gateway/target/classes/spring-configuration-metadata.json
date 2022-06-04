@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "timing.nacos.gateway.addrss",
+      "type": "java.lang.String",
+      "description": "Nacos地址"
+
+    }
+  ]
+}

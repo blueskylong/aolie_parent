@@ -13,7 +13,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
  * @version V0.0.1
  * @date 2021/7/6 0006 18:25
  **/
-@Plug
+//@Plug
 public class MonitorPlug extends BasePlug {
     private static final String PLUG_CODE = "AOLIE_MONITOR_PLUG";
     private static final String VERSION = "0.0.2";
