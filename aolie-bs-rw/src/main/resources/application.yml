@@ -1,0 +1,77 @@
+spring:
+  main:
+    allow-circular-references: true
+  jackson:
+    # 全局设置@JsonFormat的格式pattern
+    date-format: yyyy-MM-dd
+    # 当地时区
+    locale: zh
+    # 设置全局时区
+    time-zone: GMT+8
+  redis:
+    host: 192.168.3.6
+    port: 6379
+    password: root
+  application:
+    name: aolie-bs-rw
+  shardingsphere:
+    datasource:
+      names: master,slave
+      master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.3.16:3306/test_user?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+        username: root
+        password: ",Pcharint2x"
+      slave:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.3.17:3306/test_user?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+        username: root
+        password: ",Pcharint2x"
+
+    masterslave:
+      load-balance-algorithm-type: round_robin
+      name: ms
+      master-data-source-name: master
+      slave-data-source-names: slave
+    props:
+      sql:
+        show: true
+    enabled: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.3.6:8848
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: on
+    jdbc-type-for-null: 'null'
+  type-handlers-package: com.ranranx.aolie.core.ds.dataoperator.mybatis
+logging:
+  pattern:
+    console: "%C:%L %m%n"
+#pagehelper.
+pagehelper:
+  autoDialect: true
+  closeConn: true
+  hello: \u4F60\u597D
+  nihao: Hello
+  offset-as-page-num: false
+aolie:
+  uploadpath: "g:/affix_location"
+server:
+  port: 8086
+dubbo:
+  scan:
+    base-packages: "com.ranranx.aolie"
+  protocol:
+    port: 20886
+    name: dubbo
+    host: 192.168.3.6
+  cloud:
+    subscribed-services: aolie-core
+
+timing:
+  isOracle: false
